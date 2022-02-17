@@ -1,0 +1,55 @@
+{
+  "name": "Z-Wave JS Server DEVELOPMENT",
+  "version": "0.0.16",
+  "slug": "zwave_js_server",
+  "description": "Not for production purposes, use at your own risk. Will grab latest version from Zwave JS server directly from Github master.",
+  "url": "https://github.com/zwave-js/zwave-js-server",
+  "startup": "system",
+  "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
+  "map": ["config:rw"],
+  "boot": "auto",
+  "options": {
+    "branch_or_commit": "zwave-js/zwave-js-server#master",
+    "serial_port": "/dev/ttyACM0",
+    "securityKeys": {
+      "S2_Unauthenticated": "",
+      "S2_Authenticated": "",
+      "S2_AccessControl": "",
+      "S0_Legacy": ""
+    },
+    "logConfig": {
+      "enabled": true,
+      "level": "debug",
+      "forceConsole": true,
+      "logToFile": false,
+      "filename": "/config/.zwjs/zjws.log"
+    },
+    "storage": {
+      "cacheDir": "/config/.zwjs"
+    }
+  },
+  "schema": {
+    "branch_or_commit": "str",
+    "serial_port": "str",
+    "securityKeys": {
+      "S2_Unauthenticated": "str",
+      "S2_Authenticated": "str",
+      "S2_AccessControl": "str",
+      "S0_Legacy": "str"
+    },
+    "logConfig": {
+      "enabled": "bool",
+      "level": "list(trace|debug|info|notice|warning|error|fatal)",
+      "forceConsole": "bool",
+      "logToFile": "bool",
+      "filename": "str"
+    },
+    "storage": {
+      "cacheDir": "str"
+    }
+  },
+  "ports": {
+    "3000/tcp": 3000
+  },
+  "auto_uart": true
+}
