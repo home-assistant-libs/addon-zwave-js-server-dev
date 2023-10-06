@@ -1,6 +1,6 @@
 {
   "name": "Z-Wave JS Server DEVELOPMENT",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "slug": "zwave_js_server",
   "description": "Not for production purposes, use at your own risk. Will grab latest version from Zwave JS server directly from Github master.",
   "url": "https://github.com/zwave-js/zwave-js-server",
@@ -51,5 +51,5 @@
   "ports": {
     "3000/tcp": 3000
   },
-  "auto_uart": true
+  "uart": true
 }
