@@ -7,7 +7,8 @@ ENV NODE_OPTIONS=--max-old-space-size=8192 \
 WORKDIR /usr/src/app
 
 RUN apt-get update && \
-    apt-get -y install curl unzip jq git && \
+    apt-get -y install --no-install-recommends curl unzip jq git && \
+    rm -rf /var/lib/apt/lists/* && \
     corepack enable
 
 EXPOSE 8091 3000

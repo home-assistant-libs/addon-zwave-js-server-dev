@@ -29,7 +29,7 @@ ensure_package_json "$APP_DIR"
 echo "Installing @zwave-js/server from '${SERVER_SOURCE}'..."
 if is_git_ref "$SERVER_SOURCE"; then
   parse_git_ref "$SERVER_SOURCE" "$DEFAULT_SERVER_REPO"
-  npm install "${REPO}#${REF}"
+  npm install "git+https://github.com/${REPO}.git#${REF}"
 else
   npm install "@zwave-js/server@${SERVER_SOURCE}"
 fi
