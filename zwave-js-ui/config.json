@@ -21,5 +21,6 @@
     "8091/tcp": 8091,
     "3000/tcp": 3000
   },
-  "uart": true
+  "uart": true,
+  "udev": true
 }

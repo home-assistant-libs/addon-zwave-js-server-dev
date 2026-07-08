@@ -6,13 +6,20 @@ DEFAULT_UI_REPO="zwave-js/zwave-js-ui"
 DEFAULT_SERVER_REPO="zwave-js/zwave-js-server"
 DEFAULT_ZWAVE_JS_REPO="zwave-js/node-zwave-js"
 
-UI_SOURCE=$(jq -r '.zwave_js_ui_branch_or_commit' /data/options.json)
+# Fail loudly (set before the option reads so a missing/corrupt options.json
+# aborts instead of silently resolving to empty specs = npm latest).
+set -euo pipefail
+
+UI_SOURCE=$(jq -r '.zwave_js_ui_branch_or_commit // ""' /data/options.json)
 SERVER_SOURCE=$(jq -r '.zwave_js_server_branch_or_commit // ""' /data/options.json)
 ZWAVE_JS_SOURCE=$(jq -r '.zwave_js_branch_or_commit // ""' /data/options.json)
 
-# Fail loudly: a failed install must not silently start on pinned versions.
-set -euo pipefail
+if [[ -z "$UI_SOURCE" ]]; then
+  echo "ERROR: zwave_js_ui_branch_or_commit may not be empty" >&2
+  exit 1
+fi
 
+: "${STORE_DIR:?STORE_DIR must be set}"
 mkdir -p "$STORE_DIR"
 
 if is_git_ref "$UI_SOURCE"; then
@@ -20,13 +27,16 @@ if is_git_ref "$UI_SOURCE"; then
   APP_DIR=/usr/src/app/zwave-js-ui
   echo "Building zwave-js-ui from ${REPO}#${REF} (this can take several minutes)..."
   rm -rf "$APP_DIR"
-  git clone "https://github.com/${REPO}.git" "$APP_DIR"
+  git clone --filter=blob:none "https://github.com/${REPO}.git" "$APP_DIR"
   git -C "$APP_DIR" checkout "$REF"
   (cd "$APP_DIR" && npm install && npm run build)
   START_CMD=(node server/bin/www.js)
 else
   APP_DIR=/usr/src/app
   echo "Installing zwave-js-ui@${UI_SOURCE} from npm..."
+  # Start clean: overrides from a previous boot of this filesystem must not
+  # survive into a boot that no longer requests them.
+  rm -f "$APP_DIR/package.json" "$APP_DIR/package-lock.json"
   ensure_package_json "$APP_DIR"
   (cd "$APP_DIR" && npm install "zwave-js-ui@${UI_SOURCE}")
   START_CMD=(./node_modules/.bin/zwave-js-ui)
