@@ -29,6 +29,10 @@ parse_git_ref() {
     echo "ERROR: '$value' has no ref after '#'" >&2
     return 1
   fi
+  if [[ "$REF" == -* ]]; then
+    echo "ERROR: ref '$REF' may not start with '-'" >&2
+    return 1
+  fi
 }
 
 # Ensure APP_DIR has a package.json; npm pkg set (overrides) requires one, and
@@ -43,12 +47,16 @@ ensure_package_json() {
 # Record an override for PKG in APP_DIR's package.json without installing.
 # npm refuses an override that conflicts with a direct dependency, so when PKG
 # is also a direct dependency we pin the dependency to the same spec.
+# Note: pkg names containing '.' would be misparsed by npm pkg set's dotted-path syntax; fine for zwave-js/@zwave-js/* names.
 _set_override() {
   local app_dir="$1" pkg="$2" spec="$3"
   (cd "$app_dir" \
     && npm pkg set "overrides.${pkg}=${spec}" \
     && if [[ "$(npm pkg get "dependencies.${pkg}")" != "{}" ]]; then
          npm pkg set "dependencies.${pkg}=${spec}"
+       fi \
+    && if [[ "$(npm pkg get "devDependencies.${pkg}")" != "{}" ]]; then
+         npm pkg set "devDependencies.${pkg}=${spec}"
        fi)
 }
 
@@ -79,7 +87,7 @@ override_zwave_js_from_monorepo() {
   mkdir -p "$tarball_dir/@zwave-js"
 
   echo "Cloning ${repo}#${ref}..."
-  git clone "https://github.com/${repo}.git" "$src"
+  git clone --filter=blob:none "https://github.com/${repo}.git" "$src"
   git -C "$src" checkout "$ref"
 
   echo "Building node-zwave-js monorepo (this can take several minutes)..."
@@ -92,11 +100,16 @@ override_zwave_js_from_monorepo() {
   # tarball; the overrides make every @zwave-js/* package in the app tree
   # resolve from the branch tarballs instead of the npm registry.
   ensure_package_json "$app_dir"
-  local tarball name
+  local tarballs tarball name
+  tarballs=$(find "$tarball_dir" -name '*.tgz')
+  if [[ -z "$tarballs" ]]; then
+    echo "ERROR: yarn pack produced no tarballs in ${tarball_dir}" >&2
+    return 1
+  fi
   while IFS= read -r tarball; do
     name=$(tar -xOzf "$tarball" package/package.json | jq -r '.name')
     _set_override "$app_dir" "$name" "file:${tarball}"
-  done < <(find "$tarball_dir" -name '*.tgz')
+  done <<< "$tarballs"
   (cd "$app_dir" && npm install)
 }
 
@@ -106,11 +119,11 @@ override_zwave_js_from_monorepo() {
 resolved_version() {
   local app_dir="$1" pkg="$2"
   if [[ -f "$app_dir/node_modules/$pkg/package.json" ]]; then
-    jq -r '.version' "$app_dir/node_modules/$pkg/package.json"
+    jq -r '.version // "unknown"' "$app_dir/node_modules/$pkg/package.json"
   elif [[ -f "$app_dir/package.json" \
       && "$(jq -r '.name' "$app_dir/package.json")" == "$pkg" ]]; then
     # APP_DIR itself is the package (git-cloned parent app)
-    jq -r '.version' "$app_dir/package.json"
+    jq -r '.version // "unknown"' "$app_dir/package.json"
   else
     echo "NOT INSTALLED"
   fi
