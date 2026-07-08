@@ -20,6 +20,10 @@ if [[ -z "$SERVER_SOURCE" ]]; then
 fi
 
 cd "$APP_DIR"
+# Start clean: overrides from a previous boot of this container must not
+# survive into a boot that no longer requests them (Supervisor restarts
+# reuse the same container filesystem).
+rm -f "$APP_DIR/package.json" "$APP_DIR/package-lock.json"
 ensure_package_json "$APP_DIR"
 
 echo "Installing @zwave-js/server from '${SERVER_SOURCE}'..."
