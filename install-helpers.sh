@@ -108,6 +108,7 @@ override_zwave_js_from_monorepo() {
   fi
   while IFS= read -r tarball; do
     name=$(tar -xOzf "$tarball" package/package.json | jq -r '.name')
+    echo "Overriding ${name} -> file:${tarball}"
     _set_override "$app_dir" "$name" "file:${tarball}"
   done <<< "$tarballs"
   (cd "$app_dir" && npm install)
