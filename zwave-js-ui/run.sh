@@ -22,6 +22,11 @@ fi
 : "${STORE_DIR:?STORE_DIR must be set}"
 mkdir -p "$STORE_DIR"
 
+# Start clean: overrides from a previous boot of this container must not
+# survive into a boot that no longer requests them (Supervisor restarts
+# reuse the same container filesystem).
+rm -f /usr/src/app/package.json /usr/src/app/package-lock.json
+
 if is_git_ref "$UI_SOURCE"; then
   parse_git_ref "$UI_SOURCE" "$DEFAULT_UI_REPO"
   APP_DIR=/usr/src/app/zwave-js-ui
@@ -34,9 +39,6 @@ if is_git_ref "$UI_SOURCE"; then
 else
   APP_DIR=/usr/src/app
   echo "Installing zwave-js-ui@${UI_SOURCE} from npm..."
-  # Start clean: overrides from a previous boot of this filesystem must not
-  # survive into a boot that no longer requests them.
-  rm -f "$APP_DIR/package.json" "$APP_DIR/package-lock.json"
   ensure_package_json "$APP_DIR"
   (cd "$APP_DIR" && npm install "zwave-js-ui@${UI_SOURCE}")
   START_CMD=(./node_modules/.bin/zwave-js-ui)

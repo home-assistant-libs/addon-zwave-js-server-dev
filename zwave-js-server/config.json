@@ -2,7 +2,7 @@
   "name": "Z-Wave JS Server DEVELOPMENT",
   "version": "0.0.19",
   "slug": "zwave_js_server",
-  "description": "Not for production purposes, use at your own risk. Will grab latest version from Zwave JS server directly from Github master. Options renamed in 0.0.19: re-save your configuration after updating.",
+  "description": "Not for production purposes, use at your own risk. Installs any release, branch, or commit of zwave-js-server and zwave-js. Options renamed in 0.0.19: re-save your configuration after updating.",
   "url": "https://github.com/zwave-js/zwave-js-server",
   "startup": "system",
   "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
