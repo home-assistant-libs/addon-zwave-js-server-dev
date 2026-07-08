@@ -1,0 +1,25 @@
+{
+  "name": "Z-Wave JS UI DEVELOPMENT",
+  "version": "0.1.0",
+  "slug": "zwave_js_ui_dev",
+  "description": "Not for production purposes, use at your own risk. Installs any release, branch, or commit of zwave-js-ui, @zwave-js/server, and zwave-js. Configure Z-Wave settings through the zwave-js-ui web UI (port 8091).",
+  "url": "https://github.com/zwave-js/zwave-js-ui",
+  "startup": "system",
+  "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
+  "boot": "auto",
+  "options": {
+    "zwave_js_ui_branch_or_commit": "zwave-js/zwave-js-ui#master",
+    "zwave_js_server_branch_or_commit": "",
+    "zwave_js_branch_or_commit": ""
+  },
+  "schema": {
+    "zwave_js_ui_branch_or_commit": "str",
+    "zwave_js_server_branch_or_commit": "str",
+    "zwave_js_branch_or_commit": "str"
+  },
+  "ports": {
+    "8091/tcp": 8091,
+    "3000/tcp": 3000
+  },
+  "uart": true
+}
